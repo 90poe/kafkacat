@@ -104,6 +104,10 @@ else
 fi
 export PKG_CONFIG_PATH="$DEST/lib/pkgconfig"
 
+
+download https://curl.haxx.se/download/curl-7.65.3.tar.gz libcurl
+build libcurl "./configure --disable-shared --enable-static --prefix=$DEST --disable-ldap --disable-sspi && make && make install"
+
 github_download "edenhill/librdkafka" "$LIBRDKAFKA_VERSION" "librdkafka"
 build librdkafka "([ -f config.h ] || ./configure --prefix=$DEST --install-deps --disable-lz4-ext) && make -j && make install" || (echo "Failed to build librdkafka: bootstrap failed" ; false)
 
@@ -129,10 +133,11 @@ export STATIC_LIB_rdkafka="$DEST/lib/librdkafka.a"
 export STATIC_LIB_serdes="$DEST/lib/libserdes.a"
 export STATIC_LIB_yajl="$DEST/lib/libyajl_s.a"
 export STATIC_LIB_jansson="$DEST/lib/libjansson.a"
+export STATIC_LIB_curl="$DEST/lib/libcurl.a"
 
 # libserdes does not have a pkg-config file to point out secondary dependencies
 # when linking statically.
-export LIBS="$(pkg_cfg_lib rdkafka) $(pkg_cfg_lib yajl) $STATIC_LIB_avro $STATIC_LIB_jansson -lcurl"
+export LIBS="$(./libcurl/bin/curl-config --static-libs --cflags | tr '\n' ' ') $(pkg_cfg_lib rdkafka) $(pkg_cfg_lib yajl) $STATIC_LIB_avro $STATIC_LIB_jansson $STATIC_LIB_curl"
 
 # Remove tinycthread from libserdes b/c same code is also in librdkafka.
 ar dv $DEST/lib/libserdes.a tinycthread.o

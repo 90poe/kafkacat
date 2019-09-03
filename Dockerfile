@@ -1,11 +1,11 @@
 FROM debian:stretch-slim
 
-COPY . /usr/src/kafkacat
-
-ENV BUILD_DEPS build-essential zlib1g-dev liblz4-dev libssl-dev libsasl2-dev python cmake libcurl4-openssl-dev pkg-config
+ENV BUILD_DEPS build-essential zlib1g-dev liblz4-dev libssl-dev libsasl2-dev wget python cmake libcurl4-openssl-dev pkg-config
 ENV RUN_DEPS libssl1.1 libsasl2-2 ca-certificates curl
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $BUILD_DEPS $RUN_DEPS
+
+COPY . /usr/src/kafkacat
 
 RUN cd /usr/src/kafkacat && \
   rm -rf tmp-bootstrap && \
